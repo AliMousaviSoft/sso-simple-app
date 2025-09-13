@@ -1,0 +1,65 @@
+version: '3.8'
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: ssoCorp
+      MYSQL_USER: user
+      MYSQL_PASSWORD: password
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    restart: unless-stopped
+
+  corp_app:
+    build: .
+    container_name: corp_app
+    volumes:
+      - ./corp.com:/var/www/html
+    ports:
+      - "9000:80"
+    depends_on:
+      - mysql
+    restart: unless-stopped
+
+  sso_app:
+    build: .
+    container_name: sso_app
+    volumes:
+      - ./sso.corp.com:/var/www/html
+    ports:
+      - "9001:80"
+    depends_on:
+      - mysql
+    restart: unless-stopped
+
+  x_app:
+    build: .
+    container_name: x_app
+    volumes:
+      - ./x.corp.com:/var/www/html
+    ports:
+      - "9002:80"
+    depends_on:
+      - mysql
+    restart: unless-stopped
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: phpmyadmin
+    environment:
+      PMA_HOST: mysql
+      PMA_USER: user
+      PMA_PASSWORD: password
+    ports:
+      - "8080:80"
+    depends_on:
+      - mysql
+    restart: unless-stopped
+
+volumes:
+  mysql_data:
